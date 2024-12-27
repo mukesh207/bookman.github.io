@@ -6,10 +6,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Book
 from .serializers import BookSerializer
+# from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 class BookListCreateAPIView(APIView):
     def get(self, request):
-        books = Book.objects.all()
+        name = request.data.get("author")
+        books = Book.objects.filter(author = name)
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
@@ -17,6 +19,7 @@ class BookListCreateAPIView(APIView):
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            serializer.validate()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
