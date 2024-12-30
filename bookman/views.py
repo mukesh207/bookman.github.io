@@ -6,7 +6,35 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Book
 from .serializers import BookSerializer
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+
 # from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account created successfully! Please log in.')
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
+
+
+# Example of a protected view for home page
+
+@login_required
+def loginsuccess(request):
+    return redirect('books/', BookListCreateAPIView.as_view(), name='book-list-create')
+
+
+
 
 class BookListCreateAPIView(APIView):
     def get(self, request):
@@ -53,3 +81,6 @@ class BookDetailAPIView(APIView):
             return Response({"error": "Book not found"}, status=status.HTTP_404_NOT_FOUND)
         book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
